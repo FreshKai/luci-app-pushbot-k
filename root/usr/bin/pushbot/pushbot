@@ -92,9 +92,42 @@ function pushbot_init(){
 	return 0
 }
 
+# 自定义日期时间格式
+function get_custom_datetime(){
+	local date=$(date "+%Y-%m-%d");
+	local time=$(date "+%H:%M:%S");
+	local week=$(date "+%A");
+	case ${week} in
+		Monday)
+			echo ${date} 星期一 ${time}
+			;;
+		Tuesday)
+			echo ${date} 星期二 ${time}
+			;;
+		Wednesday)
+			echo ${date} 星期三 ${time}
+			;;
+		Thursday)
+			echo ${date} 星期四 ${time}
+			;;
+		Friday)
+			echo ${date} 星期五 ${time}
+			;;
+		Saturday)
+			echo ${date} 星期六 ${time}
+			;;
+		Sunday)
+			echo ${date} 星期日 ${time}
+			;;
+		*)
+			echo ${date} 未知星期 ${time}
+			;;
+	esac
+}
+
 # 推送
 function diy_send(){
-	( ! echo "$lite_enable"|grep -q "content" ) && ( ! echo "$lite_enable"|grep -q "nowtime" ) && local nowtime=`date "+%Y-%m-%d %H:%M:%S"`
+	( ! echo "$lite_enable"|grep -q "content" ) && ( ! echo "$lite_enable"|grep -q "nowtime" ) && local nowtime=$(get_custom_datetime)
 	local diyurl=`/usr/bin/jq -r .url ${3}` && local diyurl=`eval echo ${diyurl}`
 	local type=`/usr/bin/jq -r '.type' ${3}` && local type=`eval echo ${type}`
 	local data=`/usr/bin/jq -r '.data' ${3}` && local data=`eval echo ${data}`
@@ -875,7 +908,7 @@ function current_device(){
 		local ip_mac=`getmac ${ip}`
 		local ip_total=`usage get ${ip_mac}`
 		local ip_name=`getname ${ip} ${ip_mac}`
-		local ip_name=`cut_str $ip_name 15`
+		local ip_name=`cut_str $ip_name 128`
 		if [ "${#ip}" -lt "15" ]; then
 			local n=`expr 15 - ${#ip}`
 			for i in `seq 1 $n`; do
@@ -1170,7 +1203,7 @@ function send(){
 			local ip_mac=`getmac ${ip}`
 			local ip_name=`getname ${ip} ${ip_mac}`
 			local ip_total=`usage get ${ip_mac}`;[ ! -z "$ip_total" ] && local ip_total="总计流量：${ip_total}  "
-			local ip_name=`cut_str $ip_name 18`
+			local ip_name=`cut_str $ip_name 128`
 			local send_content="${send_content}${str_linefeed}${str_tab}${font_green2}【${ip_name}】${font_end2}  ${ip}${str_linefeed}${str_tab}${ip_total}在线 ${time1}"
 			unset ip_total time_down time_up time1 ip_mac ip_name
 		done
